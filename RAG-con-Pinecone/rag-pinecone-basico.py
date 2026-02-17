@@ -14,6 +14,7 @@ load_dotenv()
 
 # Importaciones para trabajar con Pinecone
 from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone
 
 
 if __name__ == '__main__':
@@ -35,6 +36,15 @@ if __name__ == '__main__':
     #======================= Paso 4: VectorStore - Llevamos los Embeddings a Pinecone ====================
     pinecone_api_key = os.getenv("PINECONE_API_KEY")
     index_name = os.getenv("PINECONE_INDEX_NAME", "langchain-pinecone-asistente-de-ventas")
+
+    # Limpiar índice antes de cargar nuevos vectores
+    try:
+        pc = Pinecone(api_key=pinecone_api_key)
+        index = pc.Index(index_name)
+        index.delete(delete_all=True)
+        print(f"✓ Índice {index_name} limpiado (delete_all=True).")
+    except Exception as e:
+        print(f"⚠️  No se pudo limpiar el índice (puede que no exista o esté vacío): {e}")
 
     vectorstore = PineconeVectorStore.from_documents(
         documents=chunks,
